@@ -4,7 +4,8 @@ import uuid
 from langchain_openai import ChatOpenAI
 from typing_extensions import TypedDict
 
-from langgraph.graph import StateGraph, START
+from langgraph.graph import StateGraph
+from langgraph.constants import START  # Import START from constants instead
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import MemorySaver
 
