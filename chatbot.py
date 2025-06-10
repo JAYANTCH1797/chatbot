@@ -1,7 +1,7 @@
 from typing import Annotated, Dict, Any
 import os
 import uuid
-from langchain.chat_models import init_chat_model
+from langchain_openai import ChatOpenAI
 from typing_extensions import TypedDict
 
 from langgraph.graph import StateGraph, START
@@ -35,7 +35,8 @@ if not api_key:
 try:
     # Only initialize if we have an API key
     if api_key:
-        llm = init_chat_model("openai:gpt-4o")
+        # Use ChatOpenAI with the gpt-4o model
+        llm = ChatOpenAI(model="gpt-4o")
     else:
         # Create a placeholder for development without crashing
         from langchain.chat_models.base import BaseChatModel
