@@ -44,44 +44,63 @@ def chat():
     thread_id = thread_ids[session_id]
     
     try:
+        # Import the necessary message type
+        from langchain_core.messages import HumanMessage
+        
+        # Create a proper HumanMessage object
+        user_message_obj = HumanMessage(content=user_message)
+        
         # Prepare the input and config for the graph
-        input_state = {"messages": [{"role": "user", "content": user_message}]}
+        input_state = {"messages": [user_message_obj]}
         config = {"configurable": {"thread_id": thread_id}}
         
         # Use the LangGraph to generate a response
         result = graph.invoke(input_state, config)
         
         # Extract the assistant's response
-        assistant_message = result["messages"][-1].content
+        if result and "messages" in result and result["messages"]:
+            last_message = result["messages"][-1]
+            assistant_message = last_message.content if hasattr(last_message, 'content') else str(last_message)
+        else:
+            assistant_message = "I'm sorry, I couldn't generate a response."
         
         return jsonify({
             'response': assistant_message,
             'session_id': session_id
         })
     
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+    except Exception as error:
+        print(f"Error in chat endpoint: {str(error)}")
+        return jsonify({'error': f"An error occurred: {str(error)}"}), 500
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    session_id = request.json.get('session_id')
-    
-    if session_id and session_id in thread_ids:
-        # Generate a new thread ID for this session
-        thread_ids[session_id] = str(uuid.uuid4())
+    try:
+        session_id = request.json.get('session_id')
+        
+        if session_id and session_id in thread_ids:
+            # Generate a new thread ID for this session
+            thread_ids[session_id] = str(uuid.uuid4())
+            return jsonify({
+                'status': 'success', 
+                'message': 'Conversation reset', 
+                'session_id': session_id
+            })
+        else:
+            # If no session ID provided or invalid, create a new one
+            new_session_id = str(uuid.uuid4())
+            thread_ids[new_session_id] = str(uuid.uuid4())
+            return jsonify({
+                'status': 'success',
+                'message': 'New conversation started',
+                'session_id': new_session_id
+            })
+    except Exception as error:
+        print(f"Error in reset endpoint: {str(error)}")
         return jsonify({
-            'status': 'Conversation reset successfully',
-            'session_id': session_id
-        })
-    else:
-        # If no session ID provided, create a new one
-        new_session_id = str(uuid.uuid4())
-        thread_ids[new_session_id] = str(uuid.uuid4())
-        return jsonify({
-            'status': 'New conversation started',
-            'session_id': new_session_id
-        })
+            'status': 'error',
+            'message': f"An error occurred: {str(error)}"
+        }), 500
 
 if __name__ == '__main__':
     # Use environment variables for port with a fallback to 5001
