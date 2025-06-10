@@ -1,0 +1,13 @@
+services:
+  # A web service for the LangGraph chatbot
+  - type: web
+    name: langgraph-memory-chatbot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: OPENAI_API_KEY
+        sync: false # This will be set manually in the Render dashboard
+    autoDeploy: true
