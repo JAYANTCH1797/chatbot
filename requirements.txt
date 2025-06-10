@@ -1,7 +1,7 @@
 flask==2.3.3
 Werkzeug==2.3.7
 langchain==0.1.9
-langchain_core==0.1.22
+langchain_core>=0.1.26
 langchain_openai==0.0.5
 langgraph==0.1.11
 langsmith==0.1.18
