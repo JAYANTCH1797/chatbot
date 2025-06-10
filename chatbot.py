@@ -23,9 +23,11 @@ if not api_key:
     print("Warning: No OpenAI API key found in environment variables.")
     print("Set the OPENAI_API_KEY environment variable for production use.")
     print("This application requires an OpenAI API key to function properly.")
+    # Exit early if no API key is found when running in production
+    if os.environ.get("ENVIRONMENT") == "production":
+        raise ValueError("OpenAI API key is required for production use")
 
-# Use the API key from environment variables
-os.environ["OPENAI_API_KEY"] = api_key
+# Initialize the language model with the API key from environment variables
 llm = init_chat_model("openai:gpt-4o")
 
 # For Anthropic:
@@ -35,6 +37,10 @@ llm = init_chat_model("openai:gpt-4o")
 # For Google Gemini:
 # os.environ["GOOGLE_API_KEY"] = "your-key-here"
 # llm = init_chat_model("google:gemini-1.5-pro")
+
+# Replace this with your actual API key and model choice
+#os.environ["ANTHROPIC_API_KEY"] = "your-api-key-here"
+#llm = init_chat_model("anthropic:claude-3-5-sonnet-latest")
 
 
 # Step 2: Define the State
