@@ -17,8 +17,8 @@ if not os.environ.get('OPENAI_API_KEY'):
 # Import the chatbot components with error handling
 try:
     from chatbot import graph, State
-except ImportError as e:
-    print(f"Error importing chatbot components: {e}")
+except ImportError as error:
+    print(f"Error importing chatbot components: {error}")
     print("Make sure all dependencies are installed correctly.")
     # Don't exit here to allow the app to start even with errors
 

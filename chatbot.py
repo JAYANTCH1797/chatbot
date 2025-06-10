@@ -31,10 +31,15 @@ if not api_key:
 try:
     # Only initialize if we have an API key
     if api_key:
-        # Use ChatOpenAI with the gpt-4o model
-        llm = ChatOpenAI(model="gpt-4o")
+        # Use ChatOpenAI with the gpt-4o model and explicit parameters
+        llm = ChatOpenAI(
+            model="gpt-4o",
+            temperature=0.7,  # Add explicit temperature
+            api_key=api_key,  # Explicitly pass the API key
+            max_tokens=1000   # Set a reasonable max_tokens limit
+        )
     else:
-        # Create a placeholder that returns a proper message format
+        # Create a placeholder for development without crashing
         class PlaceholderLLM:
             def invoke(self, messages):
                 from langchain_core.messages import AIMessage
@@ -43,13 +48,13 @@ try:
         llm = PlaceholderLLM()
         print("Using placeholder LLM due to missing API key")
         
-except Exception as e:
-    print(f"Error initializing language model: {e}")
+except Exception as error:  # Changed variable name from 'e' to 'error'
+    print(f"Error initializing language model: {error}")
     # Create a fallback model that won't crash the application
     class FallbackLLM:
         def invoke(self, messages):
             from langchain_core.messages import AIMessage
-            return AIMessage(content=f"Error initializing LLM: {str(e)}. Please check server logs.")
+            return AIMessage(content=f"Error initializing LLM: {str(error)}. Please check server logs.")
     
     llm = FallbackLLM()
 
@@ -135,8 +140,8 @@ def stream_graph_updates(user_input: str, thread_id: str = None):
                 # Only print if it's not the user's message
                 if hasattr(last_message, 'content') and last_message.content != user_input:
                     print("Assistant:", last_message.content)
-    except Exception as e:
-        print(f"Error during conversation: {e}")
+    except Exception as error:
+        print(f"Error during conversation: {error}")
 
 
 def main():
@@ -171,8 +176,8 @@ def main():
         except KeyboardInterrupt:
             print("\nGoodbye!")
             break
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        except Exception as error:
+            print(f"An error occurred: {error}")
             break
 
 
