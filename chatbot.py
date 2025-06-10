@@ -19,16 +19,39 @@ from langgraph.checkpoint.memory import MemorySaver
 # For OpenAI:
 # Get API key from environment variable
 api_key = os.environ.get("OPENAI_API_KEY", "")
+
+# Setup error handling for missing API key
 if not api_key:
     print("Warning: No OpenAI API key found in environment variables.")
     print("Set the OPENAI_API_KEY environment variable for production use.")
     print("This application requires an OpenAI API key to function properly.")
-    # Exit early if no API key is found when running in production
+    
+    # In production, log the error but don't crash the application
+    # This allows the web server to start and show a proper error message
     if os.environ.get("ENVIRONMENT") == "production":
-        raise ValueError("OpenAI API key is required for production use")
+        print("Running in production without API key - chatbot functionality will be limited")
 
-# Initialize the language model with the API key from environment variables
-llm = init_chat_model("openai:gpt-4o")
+# Initialize the language model with error handling
+try:
+    # Only initialize if we have an API key
+    if api_key:
+        llm = init_chat_model("openai:gpt-4o")
+    else:
+        # Create a placeholder for development without crashing
+        from langchain.chat_models.base import BaseChatModel
+        class PlaceholderLLM(BaseChatModel):
+            def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+                return {"content": "API key is required. Please set the OPENAI_API_KEY environment variable."}
+        llm = PlaceholderLLM()
+        print("Using placeholder LLM due to missing API key")
+except Exception as e:
+    print(f"Error initializing language model: {e}")
+    # Create a fallback model that won't crash the application
+    from langchain.chat_models.base import BaseChatModel
+    class FallbackLLM(BaseChatModel):
+        def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+            return {"content": f"Error initializing LLM: {str(e)}. Please check server logs."}
+    llm = FallbackLLM()
 
 # For Anthropic:
 # os.environ["ANTHROPIC_API_KEY"] = "sk-ant-your-key-here"

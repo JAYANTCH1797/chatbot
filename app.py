@@ -1,10 +1,26 @@
 from flask import Flask, render_template, request, jsonify, session
 import os
 import uuid
-from chatbot import graph, State
+import sys
 
+# Initialize Flask app
 app = Flask(__name__)
+
+# Configure secret key for session management
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())
+
+# Check for OpenAI API key
+if not os.environ.get('OPENAI_API_KEY'):
+    print("Warning: OPENAI_API_KEY environment variable is not set.")
+    print("The application may not function correctly without an API key.")
+
+# Import the chatbot components with error handling
+try:
+    from chatbot import graph, State
+except ImportError as e:
+    print(f"Error importing chatbot components: {e}")
+    print("Make sure all dependencies are installed correctly.")
+    # Don't exit here to allow the app to start even with errors
 
 # Dictionary to store thread IDs for each session
 thread_ids = {}
